@@ -4,7 +4,7 @@ except ImportError:
     from distutils.core import setup
 
 config = {
-    'description': 'Coding Exercise for SellerEngine Interview',
+    'description': 'Coding Exercise for Bryan Kappa',
     'author': 'Bryan Kappa',
     'url': 'https://github.com/parappathekappa/setest.git',
     'download_url': 'https://github.com/parappathekappa/setest/archive/master.zip',
