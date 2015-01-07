@@ -1,33 +1,50 @@
 from random import shuffle
 
-# Attribute class
-class Attribute(object):
+from setest.decks import frenchplayingcards as fp
+# Card Classes
 
-    # Initialize an attribute with it's properties
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+class FrenchCard(object):
 
-# Card class
-class Card(object):
+    def __init__(self, suit=None, rank=None, joker=False):
+        '''Classic french playing cards, with suits and ranks.
 
-    # Initialize the card with no attributes
-    # attributes property is a key-value dictionary
-    def __init__(self):
-        self.attributes = {}
+        Parameters
+        ----------
+        suit: str
+        rank: str
+        joker: boolean
+        '''
+        if suit not in fp.suit_list and not joker:
+            raise ValueError('Not a valid suit type!')
+        if rank not in fp.rank_list and not joker:
+            raise ValueError('Not a valid rank type!')
+        if not any([suit, rank, joker]):
+            raise ValueError('This card must have a suit/rank or be a joker!')
 
-    # Iterable over attributes, returns attribute value
-    def __iter__(self):
-        return self.attributes.itervalues()
+        if joker:
+            self.joker = joker
+        else:
+            self.suit = suit
+            self.rank = rank
 
-    # Adds an attribute to the card
-    # key is the 'name' property, value is the 'value' property
-    def add_attribute(self, attribute):
-        self.attributes[attribute.name] = attribute.value
+
+class CatanDevCard(object):
+
+    def __init__(self, kind):
+        '''Catan Development Card
+
+        Parameters
+        ----------
+        kind: one of 'knight', 'progress', 'vp'
+        '''
+        if kind not in ['knight', 'progress', 'vp']:
+            raise ValueError('This is not a valid Development card type!')
+
+        self.kind = kind
 
 # Deck class
 class Deck(object):
-    
+
     # Initialize with no cards
     def __init__(self):
         self.cards = []
