@@ -1,92 +1,105 @@
+from __future__ import print_function
+
 import nose.tools as nt
-from setest.deckofcards import FrenchCard, CatanDevCard, Deck
+from setest.deckofcards import FrenchCard, CatanDevCard, Deck, FrenchDeck
 from setest.decks.frenchplayingcards import suit_list, rank_list
 
 
 class TestCards(object):
 
-	def test_french_card(self):
-		with nt.assert_raises(ValueError):
-			bad_suit = FrenchCard('foosuit', 'A')
+    def test_french_card(self):
+        with nt.assert_raises(ValueError):
+            bad_suit = FrenchCard('foosuit', 'A')
 
-		with nt.assert_raises(ValueError):
-			bad_rank = FrenchCard('hearts', 'FooRank')
+        with nt.assert_raises(ValueError):
+            bad_rank = FrenchCard('hearts', 'FooRank')
 
-		with nt.assert_raises(ValueError):
-			bad_card = FrenchCard('foo', 'bar')
+        with nt.assert_raises(ValueError):
+            bad_card = FrenchCard('foo', 'bar')
 
-		new_card = FrenchCard('hearts', 'A')
-		nt.assert_equal(new_card.suit, 'hearts')
-		nt.assert_equal(new_card.rank, 'A')
+        new_card = FrenchCard('hearts', 'A')
+        nt.assert_equal(new_card.suit, 'hearts')
+        nt.assert_equal(new_card.rank, 'A')
 
-		joker = FrenchCard(joker=True)
-		nt.assert_true(joker)
+        joker = FrenchCard(joker=True)
+        nt.assert_true(joker)
 
-	def test_catan_card(self):
-		with nt.assert_raises(ValueError):
-			bad_dev = CatanDevCard('foocard')
+    def test_catan_card(self):
+        with nt.assert_raises(ValueError):
+            bad_dev = CatanDevCard('foocard')
 
-		dev_card = CatanDevCard('knight')
-		nt.assert_equal(dev_card.kind, 'knight')
+        dev_card = CatanDevCard('knight')
+        nt.assert_equal(dev_card.kind, 'knight')
 
-# def test_deck():
+class TestDeck(object):
 
-	# Create an empty deck
-	# thisdeck = Deck()
+    def setup(self):
+        self.deck = FrenchDeck()
 
-	# # Cycle through suit and rank lists to generate cards for the deck
-	# for suit in suit_list:
-	# 	for rank in rank_list:
+    def test_empty_deck(self):
+        deck = Deck()
+        nt.assert_equal(len(deck), 0)
+        nt.assert_list_equal([x for x in deck], [])
 
-	# 		# Assign the attributes
-	# 		thissuit = Attribute('suit', suit)
-	# 		thisrank = Attribute('rank', rank)
+    def test_deck_len(self):
+        nt.assert_equal(len(self.deck), 52)
 
-	# 		# Create a new card
-	# 		thiscard = Card()
-	# 		thiscard.add_attribute(thissuit)
-	# 		thiscard.add_attribute(thisrank)
+    def test_deck_iter(self):
+        all_cards = [c for c in self.deck]
+        nt.assert_equal(type(all_cards[0]), FrenchCard)
+        ranks = [c.rank for c in self.deck]
+        suits = [c.suit for c in self.deck]
 
-	# 		# Add the card to the deck
-	# 		thisdeck.add_card(thiscard)
+        nt.assert_items_equal(set(ranks), set(rank_list))
+        nt.assert_items_equal(set(suits), set(suit_list))
 
-	# # Test the new cards
-	# assert_equal(len(thisdeck), 52)
-	# assert_equal(thisdeck.cards[0].attributes['suit'], 'hearts')
-	# assert_equal(thisdeck.cards[0].attributes['rank'], 'A')
-	# assert_equal(thisdeck.cards[51].attributes['suit'], 'diamonds')
-	# assert_equal(thisdeck.cards[51].attributes['rank'], 'K')
+    def test_deck_shuffle(self):
+        shuffled_deck = FrenchDeck()
+        shuffled_deck.shuffle()
 
-	# # Test deal methods
-	# mycard1 = thisdeck.deal_card()
-	# assert_equal(mycard1.attributes['suit'], 'hearts')
-	# assert_equal(mycard1.attributes['rank'], 'A')
-	# mycard2 = thisdeck.deal_card()
-	# assert_equal(mycard2.attributes['suit'], 'hearts')
-	# assert_equal(mycard2.attributes['rank'], '2')
-	# assert_equal(len(thisdeck), 50)
+        nt.assert_not_equal(shuffled_deck.cards, self.deck.cards)
 
-	# # Add cards back to deck
-	# thisdeck.add_card(mycard1)
-	# thisdeck.add_card(mycard2)
-	# assert_equal(len(thisdeck), 52)
+    def test_deck_deal(self):
+        top_card = self.deck.deal()
+        nt.assert_is_instance(top_card, FrenchCard)
+        nt.assert_equal(top_card.rank, 'K')
+        nt.assert_equal(top_card.suit, 'diamonds')
 
-	# # Test dealers cheating method
-	# mycheatcard = thisdeck.deal_card_cheat()
-	# assert_equal(mycheatcard, mycard2)
-	# thisdeck.add_card(mycheatcard)
+        for x in range(0, 52, 1):
+            self.deck.deal()
+        no_card = self.deck.deal()
+        nt.assert_equal(no_card, 'No more cards to deal!')
 
-	# # Test cut method
-	# thisdeck.cut_deck(32)
-	# assert_equal(len(thisdeck), 52)
-	# assert_equal(thisdeck.cards[0].attributes['suit'], 'clubs')
-	# assert_equal(thisdeck.cards[0].attributes['rank'], '9')
-	# assert_equal(thisdeck.cards[31].attributes['suit'], 'spades')
-	# assert_equal(thisdeck.cards[31].attributes['rank'], 'A')
-	# assert_equal(thisdeck.cards[51].attributes['suit'], 'clubs')
-	# assert_equal(thisdeck.cards[51].attributes['rank'], '8')
+    def test_deck_deal_from_bottom(self):
+        bottom_card = self.deck.deal_from_bottom()
+        nt.assert_equal(bottom_card.rank, 'A')
+        nt.assert_equal(bottom_card.suit, 'hearts')
 
-	# # Test shuffle method
-	# thisdeck.shuffle_cards()
-	# assert_equal(len(thisdeck), 52)
+    def test_cut(self):
+        self.deck.cut(4)
+        bottom_card = self.deck.deal_from_bottom()
+        top_card = self.deck.deal()
 
+        nt.assert_equal(bottom_card.rank, '2')
+        nt.assert_equal(bottom_card.suit, 'hearts')
+
+        nt.assert_equal(top_card.rank, 'A')
+        nt.assert_equal(top_card.suit, 'diamonds')
+
+class TestFrenchDeck(object):
+
+    def test_add_card(self):
+        deck = FrenchDeck()
+        with nt.assert_raises(TypeError):
+            deck.add_card(CatanDevCard('knight'))
+
+        new_card = FrenchCard('spades', 'A')
+        deck.add_card(new_card)
+
+        nt.assert_equal(deck.cards[-1], new_card)
+
+        joker = FrenchCard(joker=True)
+        deck.add_card(joker)
+
+        nt.assert_equal(deck.__repr__(),
+                        '<French Deck: 54 cards, Jokers: True>')
